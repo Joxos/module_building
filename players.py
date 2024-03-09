@@ -123,26 +123,31 @@ class PlayerGroup:
                 coin_test(self.players[p1_i], self.players[p2_i])
         self.sort()
 
-    def play_and_evolve(
-        self, times, strategy=EvolutionStrategy.OBSOLETE_LAST_ALL, num=0
-    ):
-        for _ in range(times):
-            logger.info(f"Round {_+1}")
-            logger.info("Before playing:")
-            self.show_points()
-            print()
+    def play_and_evolve(self, times, strategy, num=0):
+        logger.info(f"Playing {times} rounds with evolution strategy {strategy}.")
+        logger.info(f"Initial points:")
+        self.show_points()
+        print()
+        for time in range(times):
+            logger.info(f"Round {time+1}:")
+            # logger.info("Before playing:")
+            # self.show_points()
+            # print()
             self.play_all()
-            logger.info("After playing:")
-            self.show_points()
-            print()
-            self.evolve(strategy, num)
+            # logger.info("After playing:")
+            # self.show_points()
+            # print()
+            go_on = self.evolve(strategy, num)
             logger.info("After evolution:")
             self.show_points()
+            print()
+            if not go_on:
+                break
 
-    def evolve(self, strategy, num):
+    def evolve(self, strategy, num=0):
         """Eliminate last players."""
-        if len(self.players) <= num:
-            return False
+        # if len(self.players) <= num:
+        #     return False
         if strategy == EvolutionStrategy.KEEP_BEST:
             return self.keep_best_evolve(num)
         elif strategy == EvolutionStrategy.OBSOLETE_LAST:
@@ -157,6 +162,8 @@ class PlayerGroup:
         for player_i in range(len(self.players)):
             if self.players[player_i].points == last_point:
                 start_i = player_i
+                if start_i == 0:
+                    return False
                 self.players = self.players[:start_i]
                 break
         return True
