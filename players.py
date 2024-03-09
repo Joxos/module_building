@@ -1,18 +1,11 @@
-from config import (
-    COST,
-    WIN_WIN,
-    ONE_WIN,
-    ONE_LOSS,
-    BOTH_LOSS,
-    RESET_POINTS,
-    EvolutionStrategy,
-)
 from game_logging import logger
+from headers import GameSettings, EvolutionStrategy
 
 
 class Player:
     def __init__(self):
         self.points = 0
+        self.was_cheated = False
 
     def next_choice(self):
         return True
@@ -28,7 +21,6 @@ class Repeater(Player):
 
     def __init__(self):
         super().__init__()
-        self.was_cheated = False
 
     def next_choice(self):
         if self.was_cheated:
@@ -71,7 +63,6 @@ class Fox(Player):
 
     def __init__(self):
         super().__init__()
-        self.was_cheated = False
 
     def next_choice(self):
         if self.was_cheated:
@@ -84,46 +75,45 @@ class Fox(Player):
             self.was_cheated = True
 
 
-def coin_test(a: Player, b: Player, times=5):
-    for _ in range(times):
+def coin_test(a: Player, b: Player, game_settings):
+    for _ in range(game_settings.times):
         a_put = a.next_choice()
         b_put = b.next_choice()
 
         logger.trace(
             f"A is a {a.__class__.__name__} and B is a {b.__class__.__name__}."
         )
-        logger.trace(f"A put {a_put} and B put {b_put}.", end=" ")
-        a.points -= COST
-        b.points -= COST
+        logger.trace(f"{a_put} {b_put}.", end=" ")
+        a.points -= game_settings.cost
+        b.points -= game_settings.cost
         if a_put and b_put:
             logger.trace("Both won.")
-            a.points += WIN_WIN
-            b.points += WIN_WIN
+            a.points += game_settings.win_win
+            b.points += game_settings.win_win
         elif not a_put and not b_put:
             logger.trace("Both cheated.")
-            a.points += BOTH_LOSS
-            b.points += BOTH_LOSS
-        elif not a_put:
-            logger.trace("A won.")
-            a.points += ONE_WIN
-            b.points += ONE_LOSS
-        elif not b_put:
+            a.points += game_settings.both_loss
+            b.points += game_settings.both_loss
+        elif a_put:
             logger.trace("B won.")
-            b.points += ONE_WIN
-            a.points += ONE_LOSS
+            b.points += game_settings.one_win
+            a.points += game_settings.one_loss
+        elif b_put:
+            logger.trace("A won.")
+            a.points += game_settings.one_win
+            b.points += game_settings.one_loss
 
         a.update_status(not b_put)
         b.update_status(not a_put)
-        logger.trace(
-            f"{a.__class__.__name__} has {a.points} points and {b.__class__.__name__} has {b.points} points.\n"
-        )
+        logger.trace(f"{a.points} {b.points}.\n")
 
 
 class PlayerGroup:
-    def __init__(self, players):
+    def __init__(self, players, game_settings):
         self.players = players
+        self.game_settings = game_settings
 
-    def show_points(self):
+    def show_players_number(self):
         types = set(p.__class__.__name__ for p in self.players)
         player_counts = {t: 0 for t in types}
         for player in self.players:
@@ -131,23 +121,30 @@ class PlayerGroup:
         for type in types:
             logger.info(f"{player_counts[type]} {type}")
 
+    def show_points(self):
+        for player in self.players:
+            logger.info(f"{player.__class__.__name__} has {player.points} points.")
+
     def play_all(self):
         for p1_i in range(len(self.players)):
             for p2_i in range(p1_i + 1, len(self.players)):
-                coin_test(self.players[p1_i], self.players[p2_i])
+                coin_test(self.players[p1_i], self.players[p2_i], self.game_settings)
         self.sort()
 
     def play_and_evolve(self, times, strategy, num=0):
         logger.info(f"Playing {times} rounds with evolution strategy {strategy}.")
         logger.info(f"Initial players:")
-        self.show_points()
+        self.show_players_number()
         print()
         for time in range(times):
             logger.info(f"Round {time+1} after evolution:")
             self.play_all()
             go_on = self.evolve(strategy, num)
-            self.show_points()
-            if RESET_POINTS:
+            self.show_players_number()
+            # reset information about cheating
+            for player in self.players:
+                player.was_cheated = False
+            if self.game_settings.reset_points:
                 for player in self.players:
                     player.points = 0
             if not go_on:
@@ -168,12 +165,13 @@ class PlayerGroup:
 
     def obsolete_last_all_evolve(self):
         last_point = self.players[-1].points
+        highest_point = self.players[0].points
+        self.show_points()
+        if last_point == highest_point:
+            return False
         for player_i in range(len(self.players)):
             if self.players[player_i].points == last_point:
-                start_i = player_i
-                if start_i == 0:
-                    return False
-                self.players = self.players[:start_i]
+                self.players = self.players[:player_i]
                 break
         return True
 

@@ -6,5 +6,5 @@ logger.add(
     stderr,
     colorize=True,
     format="<level>{message}</level>",
-    level="INFO",
+    level="TRACE",
 )
