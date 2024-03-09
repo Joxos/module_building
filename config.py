@@ -4,13 +4,9 @@ from enum import Enum, auto
 COST = 0
 WIN_WIN = 2
 ONE_WIN = 2
+ONE_LOSS = 0
 BOTH_LOSS = 0
-
-# player number settings
-REPEATER_NUM = 5
-FOX_NUM = 5
-CHEATER_NUM = 5
-ACCEPTOR_NUM = 5
+RESET_POINTS = True
 
 
 # evolutioin settings

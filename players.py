@@ -1,4 +1,12 @@
-from config import COST, WIN_WIN, ONE_WIN, BOTH_LOSS, EvolutionStrategy
+from config import (
+    COST,
+    WIN_WIN,
+    ONE_WIN,
+    ONE_LOSS,
+    BOTH_LOSS,
+    RESET_POINTS,
+    EvolutionStrategy,
+)
 from game_logging import logger
 
 
@@ -98,9 +106,11 @@ def coin_test(a: Player, b: Player, times=5):
         elif not a_put:
             logger.trace("A won.")
             a.points += ONE_WIN
+            b.points += ONE_LOSS
         elif not b_put:
             logger.trace("B won.")
             b.points += ONE_WIN
+            a.points += ONE_LOSS
 
         a.update_status(not b_put)
         b.update_status(not a_put)
@@ -114,8 +124,12 @@ class PlayerGroup:
         self.players = players
 
     def show_points(self):
+        types = set(p.__class__.__name__ for p in self.players)
+        player_counts = {t: 0 for t in types}
         for player in self.players:
-            logger.info(f"{player.__class__.__name__} has {player.points} points.")
+            player_counts[player.__class__.__name__] += 1
+        for type in types:
+            logger.info(f"{player_counts[type]} {type}")
 
     def play_all(self):
         for p1_i in range(len(self.players)):
@@ -125,22 +139,17 @@ class PlayerGroup:
 
     def play_and_evolve(self, times, strategy, num=0):
         logger.info(f"Playing {times} rounds with evolution strategy {strategy}.")
-        logger.info(f"Initial points:")
+        logger.info(f"Initial players:")
         self.show_points()
         print()
         for time in range(times):
-            logger.info(f"Round {time+1}:")
-            # logger.info("Before playing:")
-            # self.show_points()
-            # print()
+            logger.info(f"Round {time+1} after evolution:")
             self.play_all()
-            # logger.info("After playing:")
-            # self.show_points()
-            # print()
             go_on = self.evolve(strategy, num)
-            logger.info("After evolution:")
             self.show_points()
-            print()
+            if RESET_POINTS:
+                for player in self.players:
+                    player.points = 0
             if not go_on:
                 break
 
