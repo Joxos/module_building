@@ -84,8 +84,8 @@ def coin_test(a: Player, b: Player, game_settings):
             f"A is a {a.__class__.__name__} and B is a {b.__class__.__name__}."
         )
         logger.trace(f"{a_put} {b_put}.", end=" ")
-        a.points -= game_settings.cost
-        b.points -= game_settings.cost
+        a.points += game_settings.cost
+        b.points += game_settings.cost
         if a_put and b_put:
             logger.trace("Both won.")
             a.points += game_settings.win_win
@@ -129,6 +129,9 @@ class PlayerGroup:
         for p1_i in range(len(self.players)):
             for p2_i in range(p1_i + 1, len(self.players)):
                 coin_test(self.players[p1_i], self.players[p2_i], self.game_settings)
+            # reset information about cheating
+            for player in self.players:
+                player.was_cheated = False
         self.sort()
 
     def play_and_evolve(self, times, strategy, num=0):
@@ -141,9 +144,6 @@ class PlayerGroup:
             self.play_all()
             go_on = self.evolve(strategy, num)
             self.show_players_number()
-            # reset information about cheating
-            for player in self.players:
-                player.was_cheated = False
             if self.game_settings.reset_points:
                 for player in self.players:
                     player.points = 0
@@ -166,7 +166,7 @@ class PlayerGroup:
     def obsolete_last_all_evolve(self):
         last_point = self.players[-1].points
         highest_point = self.players[0].points
-        self.show_points()
+        # self.show_points()
         if last_point == highest_point:
             return False
         for player_i in range(len(self.players)):
