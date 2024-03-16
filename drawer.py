@@ -37,7 +37,7 @@ def draw_reward_matrix(reward_matrix):
 
 
 def show_game_results(results):
-    player_kinds = ["Repeater", "Fox", "Acceptor", "Cheater"]
+    player_kinds = ["Repeater", "Fox", "Acceptor", "Cheater", "Detector"]
 
     labels = list(results.keys())
     data = np.array(list(results.values()))

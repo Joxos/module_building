@@ -9,9 +9,6 @@ def single_round(self, opponent, game_settings):
         a_put = self.next_choice()
         b_put = opponent.next_choice()
 
-        print(
-            f"{self.__class__.__name__} put {a_put}, {opponent.__class__.__name__} put {b_put}"
-        )
         if a_put and b_put:
             self.points += game_settings.reward_matrix.win_win
             opponent.points += game_settings.reward_matrix.win_win
@@ -25,9 +22,6 @@ def single_round(self, opponent, game_settings):
             self.points += game_settings.reward_matrix.self_win
             opponent.points += game_settings.reward_matrix.opponent_lose
 
-        print(
-            f"{self.__class__.__name__} has {self.points} points, {opponent.__class__.__name__} has {opponent.points} points."
-        )
         self.update_status(not b_put)
         opponent.update_status(not a_put)
 
@@ -61,7 +55,6 @@ class Game:
                 # reset information about cheating
                 for player in self.players:
                     player.reset()
-        self.sort()
 
     def __next__(self):
         self.play_and_evolve()
@@ -74,14 +67,15 @@ class Game:
         self.play_all()
         self.round += 1
 
-        self.show_points()
-        print()
-        # self.evolve()
-        # self.breed()
+        # self.show_points()
+        # print()
+        self.evolve()
+        self.breed()
 
         if self.game_settings.reset_points:
             for player in self.players:
                 player.points = 0
+        return
 
     def evolve(self):
         """Eliminate last players."""
@@ -117,6 +111,7 @@ class Game:
 
     def obsolete_last_evolve(self):
         """Obsolete last players and eliminate last players."""
+        self.sort()
         self.players = self.players[: -self.game_settings.evolution_num]
         return True
 
