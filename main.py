@@ -1,35 +1,59 @@
-from players import Repeater, Fox, Acceptor, Cheater, PlayerGroup
-from headers import EvolutionStrategy, GameSettings
+from players import Repeater, Fox, Acceptor, Cheater
+from headers import EvolutionStrategy, GameSettings, RewardMatrix
+from game import Game
+from drawer import show_game_results
 
 
-def generate_players(repeater_num, fox_num, acceptor_num, cheater_num, game_settings):
-    return PlayerGroup(
+def generate_players(repeater_num, fox_num, acceptor_num, cheater_num):
+    return (
         [Repeater()] * repeater_num
         + [Fox()] * fox_num
         + [Acceptor()] * acceptor_num
-        + [Cheater()] * cheater_num,
-        game_settings,
+        + [Cheater()] * cheater_num
     )
+
+
+def count_players(players):
+    players_count = [0, 0, 0, 0]
+    for player in players:
+        if isinstance(player, Repeater):
+            players_count[0] += 1
+        elif isinstance(player, Fox):
+            players_count[1] += 1
+        elif isinstance(player, Acceptor):
+            players_count[2] += 1
+        elif isinstance(player, Cheater):
+            players_count[3] += 1
+    return players_count
 
 
 def main():
-    common_settings = GameSettings(
-        cost=0,
-        win_win=5,
-        one_loss=0,
-        one_win=3,
-        both_loss=0,
-        times=5,
+    common_reward = RewardMatrix(
+        self_win=3,
+        self_lose=-1,
+        opponent_win=3,
+        opponent_lose=-1,
+        win_win=2,
+        lose_lose=2,
+    )
+    settings = GameSettings(
+        reward_matrix=common_reward,
+        times=10,
         reset_points=True,
+        evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
+        evolution_num=5,
     )
-    players = generate_players(
-        repeater_num=5,
-        fox_num=5,
-        acceptor_num=5,
-        cheater_num=20,
-        game_settings=common_settings,
+    game = iter(
+        Game(
+            generate_players(repeater_num=5, fox_num=5, acceptor_num=5, cheater_num=10),
+            game_settings=settings,
+        )
     )
-    players.play_and_evolve(10, EvolutionStrategy.OBSOLETE_LAST_ALL)
+    results = {}
+    for _ in range(10):
+        results[f"Round {_+1}"] = count_players(game.players)
+        next(game)
+    show_game_results(results)
 
 
 if __name__ == "__main__":
