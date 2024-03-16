@@ -1,6 +1,7 @@
 from game_logging import logger
 from headers import EvolutionStrategy
 from random import choice
+from players import *
 
 
 def single_round(self, opponent, game_settings):
@@ -8,30 +9,27 @@ def single_round(self, opponent, game_settings):
         a_put = self.next_choice()
         b_put = opponent.next_choice()
 
-        logger.trace(
-            f"A is a {self.__class__.__name__} and B is a {opponent.__class__.__name__}."
+        print(
+            f"{self.__class__.__name__} put {a_put}, {opponent.__class__.__name__} put {b_put}"
         )
-        logger.trace(f"{a_put} {b_put}.", end=" ")
         if a_put and b_put:
-            logger.trace("Both won.")
             self.points += game_settings.reward_matrix.win_win
             opponent.points += game_settings.reward_matrix.win_win
         elif not a_put and not b_put:
-            logger.trace("Both cheated.")
             self.points += game_settings.reward_matrix.lose_lose
             opponent.points += game_settings.reward_matrix.lose_lose
         elif a_put:
-            logger.trace("opponent won.")
             opponent.points += game_settings.reward_matrix.opponent_win
             self.points += game_settings.reward_matrix.self_lose
         elif b_put:
-            logger.trace("self won.")
             self.points += game_settings.reward_matrix.self_win
             opponent.points += game_settings.reward_matrix.opponent_lose
 
+        print(
+            f"{self.__class__.__name__} has {self.points} points, {opponent.__class__.__name__} has {opponent.points} points."
+        )
         self.update_status(not b_put)
         opponent.update_status(not a_put)
-        logger.trace(f"{self.points} {opponent.points}.\n")
 
 
 class Game:
@@ -60,9 +58,9 @@ class Game:
         for p1_i in range(len(self.players)):
             for p2_i in range(p1_i + 1, len(self.players)):
                 single_round(self.players[p1_i], self.players[p2_i], self.game_settings)
-            # reset information about cheating
-            for player in self.players:
-                player.was_cheated = False
+                # reset information about cheating
+                for player in self.players:
+                    player.reset()
         self.sort()
 
     def __next__(self):
@@ -76,8 +74,10 @@ class Game:
         self.play_all()
         self.round += 1
 
-        self.evolve()
-        self.breed()
+        self.show_points()
+        print()
+        # self.evolve()
+        # self.breed()
 
         if self.game_settings.reset_points:
             for player in self.players:

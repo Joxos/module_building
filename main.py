@@ -1,15 +1,16 @@
-from players import Repeater, Fox, Acceptor, Cheater
+from players import Repeater, Fox, Acceptor, Cheater, Detector
 from headers import EvolutionStrategy, GameSettings, RewardMatrix
 from game import Game
 from drawer import show_game_results
 
 
-def generate_players(repeater_num, fox_num, acceptor_num, cheater_num):
+def generate_players(repeater_num, fox_num, acceptor_num, cheater_num, detector_num):
     return (
         [Repeater()] * repeater_num
         + [Fox()] * fox_num
         + [Acceptor()] * acceptor_num
         + [Cheater()] * cheater_num
+        + [Detector()] * detector_num
     )
 
 
@@ -34,7 +35,7 @@ def main():
         opponent_win=3,
         opponent_lose=-1,
         win_win=2,
-        lose_lose=2,
+        lose_lose=0,
     )
     settings = GameSettings(
         reward_matrix=common_reward,
@@ -45,12 +46,14 @@ def main():
     )
     game = iter(
         Game(
-            generate_players(repeater_num=5, fox_num=5, acceptor_num=5, cheater_num=10),
+            generate_players(
+                repeater_num=1, fox_num=1, acceptor_num=1, cheater_num=1, detector_num=1
+            ),
             game_settings=settings,
         )
     )
     results = {}
-    for _ in range(10):
+    for _ in range(1):
         results[f"Round {_+1}"] = count_players(game.players)
         next(game)
     show_game_results(results)
