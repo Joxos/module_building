@@ -15,16 +15,18 @@ common_reward_matrix = RewardMatrix(
     opponent_lose=-1,   
     win_win=2,
     lose_lose=0,
+    title='common reward matrix'
 )
 
 initial_ratios = [[round(random(), 2) for _ in range(5)] for _ in range(10)]
 final_results = []
+player_num = 10
 for ratio in initial_ratios:
-    repeater_num = int(30 * ratio[0])
-    fox_num = int(30 * ratio[1])
-    acceptor_num = int(30 * ratio[2])
-    cheater_num = int(30 * ratio[3])
-    detector_num = int(30 * ratio[4])
+    repeater_num = int(player_num * ratio[0])
+    fox_num = int(player_num * ratio[1])
+    acceptor_num = int(player_num * ratio[2])
+    cheater_num = int(player_num * ratio[3])
+    detector_num = int(player_num * ratio[4])
 
     settings = GameSettings(
         reward_matrix=common_reward_matrix,
@@ -43,26 +45,42 @@ for ratio in initial_ratios:
         )
     )
 
-    for _ in range(6):
+    for _ in range(10):
         next(game)
 
     final_results.append(count_players(game.players))
 
 draw_initial_ratio_impact(initial_ratios, final_results, 5)
 
-reward_configs = [[3, -1, 3, -1, 2, 0], [4, -2, 4, -2, 1, -1], [5, 0, 5, 0, 3, -2]]
+win_win_reward_matrix = RewardMatrix(
+    self_win=3,
+    self_lose=-1,
+    opponent_win=3,
+    opponent_lose=-1,   
+    win_win=4,
+    lose_lose=0,
+    title='win-win encouraged'
+)
+lose_lose_reward_matrix = RewardMatrix(
+    self_win=3,
+    self_lose=-1,
+    opponent_win=3,
+    opponent_lose=-1,   
+    win_win=2,
+    lose_lose=-2,
+    title='lose-lose punished'
+)
+reward_configs = [common_reward_matrix,win_win_reward_matrix,lose_lose_reward_matrix]
 final_results = []
+repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 5, 5, 5
 for config in reward_configs:
-    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
-
     settings = GameSettings(
-        reward_matrix=RewardMatrix(*config),
+        reward_matrix=config,
         times=10,
         reset_points=True,
         evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
         evolution_num=5,
     )
-
     game = iter(
         Game(
             generate_players(
@@ -71,18 +89,17 @@ for config in reward_configs:
             game_settings=settings,
         )
     )
-
-    for _ in range(6):
+    for _ in range(10):
         next(game)
 
     final_results.append(count_players(game.players))
 
 draw_reward_matrix_impact(reward_configs, final_results)
 
-rounds = [5, 10, 15]
+rounds = list(range(1, 12, 2))
 evolution_data = []
 for round in rounds:
-    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
+    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 5
 
     settings = GameSettings(
         reward_matrix=common_reward_matrix,
@@ -102,7 +119,7 @@ for round in rounds:
     )
 
     data = []
-    for _ in range(round + 1):
+    for _ in range(10):
         data.append(count_players(game.players))
         next(game)
     evolution_data.append(data)
