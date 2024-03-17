@@ -4,7 +4,14 @@ from enum import Enum, auto
 # game settings
 class RewardMatrix:
     def __init__(
-        self, self_win, self_lose, opponent_win, opponent_lose, win_win, lose_lose,title
+        self,
+        self_win,
+        self_lose,
+        opponent_win,
+        opponent_lose,
+        win_win,
+        lose_lose,
+        title,
     ):
         self.self_win = self_win
         self.self_lose = self_lose
