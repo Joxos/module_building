@@ -1,72 +1,137 @@
-from players import Repeater, Fox, Acceptor, Cheater, Detector
 from headers import EvolutionStrategy, GameSettings, RewardMatrix
 from game import Game
-from drawer import show_game_results
+from random import random
+from drawer import (
+    draw_initial_ratio_impact,
+    draw_reward_matrix_impact,
+    draw_rounds_impact,
+)
+from utils import generate_players, count_players
 
+common_reward_matrix = RewardMatrix(
+    self_win=3,
+    self_lose=-1,
+    opponent_win=3,
+    opponent_lose=-1,   
+    win_win=2,
+    lose_lose=0,
+)
 
-def generate_players(repeater_num, fox_num, acceptor_num, cheater_num, detector_num):
-    players = []
+initial_ratios = [[round(random(), 2) for _ in range(5)] for _ in range(10)]
+final_results = []
+for ratio in initial_ratios:
+    repeater_num = int(30 * ratio[0])
+    fox_num = int(30 * ratio[1])
+    acceptor_num = int(30 * ratio[2])
+    cheater_num = int(30 * ratio[3])
+    detector_num = int(30 * ratio[4])
 
-    for i in range(repeater_num):
-        players.append(Repeater())
-    for i in range(fox_num):
-        players.append(Fox())
-    for i in range(acceptor_num):
-        players.append(Acceptor())
-    for i in range(cheater_num):
-        players.append(Cheater())
-    for i in range(detector_num):
-        players.append(Detector())
-
-    return players
-
-
-def count_players(players):
-    players_count = [0, 0, 0, 0, 0]
-    for player in players:
-        if isinstance(player, Repeater):
-            players_count[0] += 1
-        elif isinstance(player, Fox):
-            players_count[1] += 1
-        elif isinstance(player, Acceptor):
-            players_count[2] += 1
-        elif isinstance(player, Cheater):
-            players_count[3] += 1
-        elif isinstance(player, Detector):
-            players_count[4] += 1
-    return players_count
-
-
-def main():
-    common_reward = RewardMatrix(
-        self_win=3,
-        self_lose=-1,
-        opponent_win=3,
-        opponent_lose=-1,
-        win_win=2,
-        lose_lose=0,
-    )
     settings = GameSettings(
-        reward_matrix=common_reward,
+        reward_matrix=common_reward_matrix,
         times=10,
         reset_points=True,
         evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
         evolution_num=5,
     )
+
     game = iter(
         Game(
             generate_players(
-                repeater_num=6, fox_num=5, acceptor_num=5, cheater_num=6, detector_num=3
+                repeater_num, fox_num, acceptor_num, cheater_num, detector_num
             ),
             game_settings=settings,
         )
     )
-    results = {}
-    for _ in range(10):
-        results[f"Round {_+1}"] = count_players(game.players)
+
+    for _ in range(6):
         next(game)
-    show_game_results(results)
 
+    final_results.append(count_players(game.players))
 
-if __name__ == "__main__":
-    main()
+draw_initial_ratio_impact(initial_ratios, final_results, 5)
+
+reward_configs = [[3, -1, 3, -1, 2, 0], [4, -2, 4, -2, 1, -1], [5, 0, 5, 0, 3, -2]]
+final_results = []
+for config in reward_configs:
+    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
+
+    settings = GameSettings(
+        reward_matrix=RewardMatrix(*config),
+        times=10,
+        reset_points=True,
+        evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
+        evolution_num=5,
+    )
+
+    game = iter(
+        Game(
+            generate_players(
+                repeater_num, fox_num, acceptor_num, cheater_num, detector_num
+            ),
+            game_settings=settings,
+        )
+    )
+
+    for _ in range(6):
+        next(game)
+
+    final_results.append(count_players(game.players))
+
+draw_reward_matrix_impact(reward_configs, final_results)
+
+rounds = [5, 10, 15]
+evolution_data = []
+for round in rounds:
+    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
+
+    settings = GameSettings(
+        reward_matrix=common_reward_matrix,
+        times=round,
+        reset_points=True,
+        evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
+        evolution_num=5,
+    )
+
+    game = iter(
+        Game(
+            generate_players(
+                repeater_num, fox_num, acceptor_num, cheater_num, detector_num
+            ),
+            game_settings=settings,
+        )
+    )
+
+    data = []
+    for _ in range(round + 1):
+        data.append(count_players(game.players))
+        next(game)
+    evolution_data.append(data)
+
+draw_rounds_impact(rounds, evolution_data)
+
+# elimination_nums = [2, 5, 10]
+# final_results = []
+# for elim_num in elimination_nums:
+#     repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
+
+#     settings = GameSettings(
+#         reward_matrix=RewardMatrix(
+#             self_win=3, self_lose=-1, opponent_win=3, opponent_lose=-1, win_win=2, lose_lose=0
+#         ),
+#         times=10,
+#         reset_points=True,
+#         evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
+#         evolution_num=elim_num,
+#     )
+
+#     game = iter(Game(
+#         generate_players(repeater_num, fox_num, acceptor_num, cheater_num, detector_num),
+#         game_settings=settings,
+#     ))
+
+#     for _ in range(6):
+#         next(game)
+
+#     final_results.append(count_players(game.players))
+
+# draw_elimination_impact(elimination_nums, final_results)
