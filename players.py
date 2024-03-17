@@ -1,6 +1,3 @@
-from game_logging import logger
-
-
 class Player:
     def __init__(self):
         self.points = 0

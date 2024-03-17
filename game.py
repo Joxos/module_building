@@ -1,7 +1,6 @@
 from game_logging import logger
 from headers import EvolutionStrategy
 from random import choice
-from players import *
 
 
 def single_round(self, opponent, game_settings):

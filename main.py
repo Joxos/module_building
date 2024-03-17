@@ -3,7 +3,6 @@ from game import Game
 from random import random
 from drawer import (
     draw_initial_ratio_impact,
-    draw_reward_matrix_impact,
     draw_rounds_impact,
     draw_elimination_impact,
 )
