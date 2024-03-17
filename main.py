@@ -4,7 +4,6 @@ from random import random
 from drawer import (
     draw_initial_ratio_impact,
     draw_rounds_impact,
-    draw_elimination_impact,
 )
 from utils import generate_players, count_players
 
@@ -132,38 +131,38 @@ for round in rounds:
 
 draw_rounds_impact(rounds, evolution_data)
 
-elimination_nums = [2, 5, 10]
-final_results = []
-for elim_num in elimination_nums:
-    repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
+# elimination_nums = [2, 5, 10]
+# final_results = []
+# for elim_num in elimination_nums:
+#     repeater_num, fox_num, acceptor_num, cheater_num, detector_num = 5, 5, 15, 5, 0
 
-    settings = GameSettings(
-        reward_matrix=RewardMatrix(
-            self_win=3,
-            self_lose=-1,
-            opponent_win=3,
-            opponent_lose=-1,
-            win_win=2,
-            lose_lose=0,
-        ),
-        times=10,
-        reset_points=True,
-        evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
-        evolution_num=elim_num,
-    )
+#     settings = GameSettings(
+#         reward_matrix=RewardMatrix(
+#             self_win=3,
+#             self_lose=-1,
+#             opponent_win=3,
+#             opponent_lose=-1,
+#             win_win=2,
+#             lose_lose=0,
+#         ),
+#         times=10,
+#         reset_points=True,
+#         evolution_strategy=EvolutionStrategy.OBSOLETE_LAST,
+#         evolution_num=elim_num,
+#     )
 
-    game = iter(
-        Game(
-            generate_players(
-                repeater_num, fox_num, acceptor_num, cheater_num, detector_num
-            ),
-            game_settings=settings,
-        )
-    )
+#     game = iter(
+#         Game(
+#             generate_players(
+#                 repeater_num, fox_num, acceptor_num, cheater_num, detector_num
+#             ),
+#             game_settings=settings,
+#         )
+#     )
 
-    for _ in range(6):
-        next(game)
+#     for _ in range(6):
+#         next(game)
 
-    final_results.append(count_players(game.players))
+#     final_results.append(count_players(game.players))
 
-draw_elimination_impact(elimination_nums, final_results)
+# draw_elimination_impact(elimination_nums, final_results)
