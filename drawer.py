@@ -15,7 +15,10 @@ def draw_reward_matrix_impact(reward_configs, final_results, max_cols=3):
         ax.imshow(np.array(result).reshape(1, 5), cmap="hot")
         ax.set_xticks(np.arange(5))
         ax.set_xticklabels(["Repeater", "Fox", "Acceptor", "Cheater", "Detector"])
-        ax.set_title(f"Reward Config: {config}")
+        ax.set_title(f"{config.title}")
+        ax.set_yticks([])
+        for j in range(0,5):
+            ax.text(j,0,final_results[i][j],ha="center",va="center",color="green",size=14)
     
     for j in range(i + 1, rows * cols):
         fig.delaxes(axs[j // cols, j % cols])
@@ -41,22 +44,6 @@ def draw_initial_ratio_impact(initial_ratios, final_results, max_cols=3):
     for j in range(i + 1, rows * cols):
         fig.delaxes(axs[j // cols, j % cols])
 
-    plt.tight_layout()
-    plt.show()
-
-
-def draw_reward_matrix_impact(reward_configs, final_results):
-    fig, axs = plt.subplots(1, len(reward_configs), figsize=(15, 5))
-    for i, (config, result) in enumerate(zip(reward_configs, final_results)):
-        axs[i].imshow(np.array(result).reshape(1, 5), cmap="hot")
-        axs[i].set_xticks(np.arange(5))
-        axs[i].set_xticklabels(["Repeater", "Fox", "Acceptor", "Cheater", "Detector"])
-        axs[i].set_yticks([])
-        axs[i].set_title(f"Reward Config: {config.title}")
-    # text annotations
-    for i in range(len(reward_configs)):
-        for j in range(len(final_results[i])):
-            axs[i].text(j, 0, final_results[i][j], ha="center", va="center", color="green", size=14)
     plt.tight_layout()
     plt.show()
 
